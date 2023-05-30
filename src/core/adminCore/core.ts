@@ -183,6 +183,7 @@ export default class Engine<TInputElementType extends { innerElements: TInputEle
 
   private buildTree() {
     const root = updateTreeLines(this.elementsToUpdate);
+    this.elementsToUpdate.length = 0;
 
     if (root)
       this.elementInnerTreeRoot = root;

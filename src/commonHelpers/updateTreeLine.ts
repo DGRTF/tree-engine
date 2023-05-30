@@ -17,7 +17,13 @@ export default function updateTreeLines<TElementType extends { innerElements: TE
   if (root)
     removeIsElementChangedUnnecessaryProperty(root);
 
-  return root ? { ...root as any as TreeWithIdAndParent<TElementType> } : root;
+  if (root) {
+    const newElement = { ...root as any as TreeWithIdAndParent<TElementType> };
+    newElement.innerElements.forEach(x => x[parent] = newElement);
+    root = newElement;
+  }
+
+  return root;
 }
 
 const updateTreeLine =
@@ -31,17 +37,26 @@ const updateTreeLine =
       return;
     }
 
-    element.innerElements = element.innerElements.map(x => x);
+    element.innerElements = element.innerElements.map(x => (x[parent] = element, x));
     updateElementAndParentCollection(element);
 
-    return updateTreeLine(element[parent]!);
+    return updateTreeLine(element[parent]);
   }
 
 const updateElementAndParentCollection =
   <TElementType extends IInputTreeNode<TElementType>>
     (element: TreeWithIdAndParent<TElementType>) =>
     element[parent]!.innerElements = element[parent]!.innerElements
-      .map(x => x[idProperty] === element[idProperty] ? { ...x } : x);
+      .map(x => {
+        if (x[idProperty] === element[idProperty]) {
+          const newElement = { ...x };
+          newElement.innerElements.forEach(y => y[parent] = newElement);
+
+          return newElement;
+        }
+
+        return x;
+      });
 
 const removeIsElementChangedUnnecessaryProperty =
   <TElementType extends IInputTreeNode<TElementType>>

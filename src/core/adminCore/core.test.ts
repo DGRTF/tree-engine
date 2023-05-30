@@ -98,6 +98,25 @@ const getEngineAndTreeMap = () => {
   return [engine, oldMap] as const;
 }
 
+
+const getEngineAndTreeMapWithYourData = (data: ITestDataBase) => {
+  const engine = new Engine<ITestDataBase>(data,
+    getWorkTreeWithParentElement,
+    []
+  );
+
+  // ACT
+  let actualElements = engine.getElements();
+
+  if (!actualElements)
+    throw new Error('Root not exists');
+
+  const oldMap = getEnumerableTreeObjectByPropertyWithMethods(actualElements, x => x.innerElements)
+    .enumerableToMap(x => x[testId] as number, x => x);
+
+  return [engine, oldMap] as const;
+}
+
 const getElementsFromEngine = (engine: Engine<ITestDataBase>) => {
   const actualElements = engine.getElements();
 
@@ -115,9 +134,6 @@ test('SHOULD get elements with id symbol property WHEN we got schema', () => {
   const uniqueNotEmptyIds = new Set(ids.filter(x => x));
 
   // ASSERT
-  // getEnumerableTreeObjectByPropertyWithMethods(oldMap.get(1) as TreeWithIdReadonly<ITestData>, x => x.innerElements)
-  //   .enumerableForEach(x => expect(x.hasOwnProperty(parent)).toBe(false));
-
   expect(uniqueNotEmptyIds.size).toBe(6);
 });
 
@@ -184,6 +200,56 @@ test('SHOULD add element in a schema', () => {
 
   checkThatNodesWasUpdated([1, 2], oldMap, innerElementsCollection as any, actualMap);
   checkNotChangedNodes([3, 4, 5, 6], oldMap, innerElementsCollection as any, actualMap);
+});
+
+test('SHOULD add element in a schema few times', () => {
+  const [engine, oldMap] = getEngineAndTreeMapWithYourData({ [testId]: 1, innerElements: [], type: "input" } as ITestDataBase);
+  const lastId = oldMap.get(1)?.[idProperty] ?? 0;
+  const indexToInsert = 0;
+
+  const elementToInsert = {
+    [testId]: 2,
+    type: 'input' as const,
+    innerElements: [],
+  };
+
+  engine.addElement(
+    elementToInsert,
+    indexToInsert,
+    lastId);
+
+  getElementsFromEngine(engine);
+
+  engine.addElement(
+    {
+      [testId]: 3,
+      type: 'input' as const,
+      innerElements: [],
+    } as ITestDataBase,
+    indexToInsert,
+    lastId);
+
+  let actualMap = getElementsFromEngine(engine);
+
+  engine.addElement(
+    {
+      [testId]: 4,
+      type: 'input' as const,
+      innerElements: [],
+    } as ITestDataBase,
+    indexToInsert,
+    actualMap.get(2)?.[idProperty] ?? 0);
+
+  actualMap = getElementsFromEngine(engine);
+
+  // ASSERT
+  // expect(actualMap.get(2)?.innerElements[indexToInsert]).toBe(elementToInsert);
+  const ids = getIdsFromEachNode(actualMap.get(1) as any);
+  const uniqueNotEmptyIds = new Set(ids.filter(x => x));
+  expect(uniqueNotEmptyIds.size).toBe(4);
+
+  // checkThatNodesWasUpdated([1, 2], oldMap, innerElementsCollection as any, actualMap);
+  // checkNotChangedNodes([3, 4, 5, 6], oldMap, innerElementsCollection as any, actualMap);
 });
 
 test('SHOULD edit element in a schema', () => {

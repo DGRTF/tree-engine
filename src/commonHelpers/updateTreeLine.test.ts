@@ -2,7 +2,7 @@ import elementsTreeToHashMap from "./elementsTreeToHashMap";
 import getConfig, { ITestData, testId } from "./commonForTests";
 import setParentToElements from "./getWorkTreeWithParentElement";
 import updateTreeLines from "./updateTreeLine";
-import { TreeWithIdAndParent } from "../core/coreModels/IElement";
+import { TreeWithIdAndParent, parent } from "../core/coreModels/IElement";
 
 test('updateTreeLine', () => {
   const elements = setParentToElements(getConfig() as any as TreeWithIdAndParent<ITestData>);
@@ -41,8 +41,10 @@ test('updateTreeLine', () => {
 
   expect(oneElementBefore).not.toBe(oneElementAfter);
   expect(twoElementBefore).not.toBe(twoElementAfter);
+  expect(twoElementBefore[parent]).not.toBe(twoElementAfter[parent]);
   expect(threeElementBefore).toBe(threeElementAfter);
   expect(fourElementBefore).not.toBe(fourElementAfter);
+  expect(fourElementBefore[parent]).not.toBe(fourElementAfter[parent]);
   expect(fiveElementBefore).toBe(fiveElementAfter);
   expect(sixElementBefore).toBe(sixElementAfter);
 
