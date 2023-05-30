@@ -1,5 +1,5 @@
 import Engine, { IEngine } from "./core/adminCore/core";
-import setParentIdToElements from "./commonHelpers/getWorkTreeWithParentElement";
+import setParentIdToElements from "./src/commonHelpers/getWorkTreeWithParentElement";
 
 class Input {
   readonly type: 'input' = 'input';

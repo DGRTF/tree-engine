@@ -1,5 +1,5 @@
 import { freezeTree, unfreezeTree } from "./freezeTree";
-import getTree from "../commonHelpers/commonForTests";
+import getTree from "./commonForTests";
 import { getEnumerableTreeObjectByPropertyWithMethods } from "./elementsTreeToHashMap";
 import { idProperty, innerElementsPropertyName, parent } from "../core/coreModels/IElement";
 
