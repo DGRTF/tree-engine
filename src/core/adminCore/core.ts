@@ -40,13 +40,13 @@ export default class Engine<TInputElementType extends { innerElements: TInputEle
   }
 
   private addIdToElements<TInputElementType extends IInputTreeNode<TInputElementType>>(treeRoot: TInputElementType, idFrom: number) {
-    let id = idFrom + 1;
+    let id = idFrom;
 
     getEnumerableTreeObjectByPropertyWithMethods(treeRoot, x => x.innerElements)
       .enumerableForEach((x) => {
+        id++;
         x[idProperty] = id;
         x[parent] = undefined;
-        id++;
       });
 
     return [treeRoot as any as TreeWithIdAndParent<TInputElementType>, id] as const;
