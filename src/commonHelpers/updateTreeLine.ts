@@ -37,8 +37,8 @@ const updateTreeLine =
       return;
     }
 
-    element.innerElements = element.innerElements.map(x => (x[parent] = element, x));
     updateElementAndParentCollection(element);
+    element[isElementChanged] = true;
 
     return updateTreeLine(element[parent]);
   }
@@ -50,7 +50,7 @@ const updateElementAndParentCollection =
       .map(x => {
         if (x[idProperty] === element[idProperty]) {
           const newElement = { ...x };
-          newElement.innerElements.forEach(y => y[parent] = newElement);
+          newElement.innerElements = newElement.innerElements.map(y => (y[parent] = newElement, y));
 
           return newElement;
         }

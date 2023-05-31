@@ -15,7 +15,6 @@ const freeze =
       return;
 
     passedObjects.add(root);
-    Object.preventExtensions(root);
 
     [...Object.keys(root), ...Object.getOwnPropertySymbols(root)]
       .forEach(key => {
@@ -44,7 +43,6 @@ const unfreeze = <TElementType extends {}>(root: TElementType) => {
     return;
 
   passedObjects.add(root);
-  Object.preventExtensions(root);
 
   [...Object.keys(root), ...Object.getOwnPropertySymbols(root)]
     .forEach(key => {
