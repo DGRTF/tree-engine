@@ -132,7 +132,14 @@ export default class Engine<TInputElementType extends { innerElements: TInputEle
     this.elementsToUpdate.push(...this.addElementToUpdate(this.removeElementsIds));
 
     addIterableMethodsInObject<Set<number>, number, "enumerable">(this.removeElementsIds)
-      .enumerableForEach(x => this.elementsMap.delete(x));
+      .enumerableMap(x =>
+        getEnumerableTreeObjectByPropertyWithMethods(this.elementsMap.get(x)!, x => x.innerElements)
+          .enumerableMap(x => x[idProperty])
+          .enumerableToSet()
+      )
+      .enumerableFlatMap(x => x)
+      .enumerableForEach(x => this.elementsMap.delete(x as any));
+
     this.removeElementsIds.clear();
   }
 
@@ -145,10 +152,15 @@ export default class Engine<TInputElementType extends { innerElements: TInputEle
 
   private executeEditCommands() {
     const result = editElementCommandExecute(this.editCommands,
-      this.getElementFromCollection.bind(this));
+      x => this.elementsMap.get(x));
 
-    if (result)
-      this.elementInnerTreeRoot = result;
+    // update elements in a map
+    result.forEach(x => {
+      if (x[idProperty] === this.elementInnerTreeRoot?.[idProperty])
+        this.elementInnerTreeRoot = x;
+
+      this.elementsMap.set(x[idProperty], x);
+    })
 
     this.elementsToUpdate.push(...this.addElementToUpdate(this.editCommands.keys()));
     this.editCommands.clear();
@@ -166,8 +178,7 @@ export default class Engine<TInputElementType extends { innerElements: TInputEle
         };
       });
 
-    addCommandExecute(convertedCommands,
-      this.getElementFromCollection.bind(this));
+    addCommandExecute(convertedCommands, x => this.elementsMap.get(x));
 
     this.elementsMap = addIterableMethodsInArray(convertedCommands)
       .enumerableMap(x => x.newElement)

@@ -3,23 +3,26 @@ import { IInputTreeNode, idProperty, parent, TreeWithIdReadonly, TreeWithIdAndPa
 export default
   <TElementType extends IInputTreeNode<TElementType>, TObjectToEdit extends {}>(
     editCommands: Readonly<Map<number, readonly TObjectToEdit[]>>,
-    getElement: (elementId: number) => TreeWithIdAndParent<TElementType>) => {
+    getElement: (elementId: number) => TreeWithIdAndParent<TElementType> | undefined) => {
 
-    let rootElementToChange: TreeWithIdAndParent<TElementType> | undefined;
+    const changedElements: TreeWithIdAndParent<TElementType>[] = [];
 
     for (const changes of editCommands) {
       const element = getElement(changes[0]);
-      const newElement = changes[1].reduce((x: TreeWithIdAndParent<TElementType>, y) => ({ ...x, ...y }), element);
 
-      if (!element[parent])
-        rootElementToChange = newElement;
+      if (!element)
+        continue;
+
+      const newElement = changes[1].reduce((x: TreeWithIdAndParent<TElementType>, y) => ({ ...x, ...y }), element);
+      newElement.innerElements.forEach(x => x[parent] = newElement);
+      changedElements.push(newElement);
 
       if (element[parent])
         changeOldElementToNewEditElementInParentCollection(element, newElement);
 
     };
 
-    return rootElementToChange ?? false;
+    return changedElements;
   }
 
 const changeOldElementToNewEditElementInParentCollection =

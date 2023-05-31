@@ -1,18 +1,21 @@
+import { addIterableMethodsInArray } from "iterate_library";
 import { IInputTreeNode, parent, TreeWithIdAndParent, idProperty } from "../core/coreModels/IElement";
 import { getEnumerableTreeObjectByPropertyWithMethods } from "./elementsTreeToHashMap";
 
 const isElementChanged = Symbol();
 
 export default function updateTreeLines<TElementType extends { innerElements: TElementType[] }>
-  (elements: readonly TreeWithIdAndParent<TElementType>[]) {
+  (elements: TreeWithIdAndParent<TElementType>[]) {
   let root: TreeWithIdAndParent<TElementType> | undefined = undefined;
 
-  elements.forEach(x => {
-    const returnedRoot = updateTreeLine(x)
+  addIterableMethodsInArray(elements)
+    .enumerableToMap(x => x[idProperty], x => x)
+    .forEach(x => {
+      const returnedRoot = updateTreeLine(x);
 
-    if (returnedRoot)
-      root = returnedRoot;
-  });
+      if (returnedRoot)
+        root = returnedRoot;
+    });
 
   if (root)
     removeIsElementChangedUnnecessaryProperty(root);
@@ -38,7 +41,6 @@ const updateTreeLine =
     }
 
     updateElementAndParentCollection(element);
-    element[isElementChanged] = true;
 
     return updateTreeLine(element[parent]);
   }
@@ -51,6 +53,7 @@ const updateElementAndParentCollection =
         if (x[idProperty] === element[idProperty]) {
           const newElement = { ...x };
           newElement.innerElements = newElement.innerElements.map(y => (y[parent] = newElement, y));
+          newElement[isElementChanged] = true;
 
           return newElement;
         }

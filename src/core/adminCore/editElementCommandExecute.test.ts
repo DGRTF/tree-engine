@@ -27,7 +27,7 @@ test('editElementCommandExecute', () => {
   if (!newRoot)
     throw new Error('Can not false');
 
-  const elementsMapNew = getEnumerableTreeObjectByPropertyWithMethods(newRoot, x => x.innerElements)
+  const elementsMapNew = getEnumerableTreeObjectByPropertyWithMethods(newRoot[0], x => x.innerElements)
     .enumerableToMap(x => x[idProperty], x => x);
 
   const firstChangedElement = elementsMapNew.get(1);

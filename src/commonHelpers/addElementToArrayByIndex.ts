@@ -1,5 +1,5 @@
 export default function addElementToArrayByIndex<TElement>(
-  elements: TElement[],
+  elements: readonly TElement[],
   newElement: TElement,
   index: number
 ): TElement[] {

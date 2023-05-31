@@ -8,13 +8,17 @@ export interface IAddCommand<TElementType extends IInputTreeNode<TElementType>> 
 }
 
 export default <TElementType extends IInputTreeNode<TElementType>>(newElements: readonly IAddCommand<TElementType>[],
-  getElement: (elementId: number) => TreeWithIdAndParent<TElementType>) =>
+  getElement: (elementId: number) => TreeWithIdAndParent<TElementType> | undefined) =>
   newElements.forEach(x => addElementToTree(x, getElement));
 
 const addElementToTree = <TElementType extends IInputTreeNode<TElementType>>(addCommand: IAddCommand<TElementType>,
-  getElement: (elementId: number) => TreeWithIdAndParent<TElementType>) => {
+  getElement: (elementId: number) => TreeWithIdAndParent<TElementType> | undefined) => {
 
   const parentElement = getElement(addCommand.parentElementId);
+
+  if (!parentElement)
+    return;
+
   checkParentInnerElementsLength(addCommand.indexToInsert, parentElement.innerElements);
 
   parentElement.innerElements = addElementToArrayByIndex(
@@ -25,7 +29,7 @@ const addElementToTree = <TElementType extends IInputTreeNode<TElementType>>(add
   addCommand.newElement[parent] = parentElement;
 }
 
-const checkParentInnerElementsLength = <TItem>(index: number, parentContainer: TItem[]) => {
+const checkParentInnerElementsLength = <TItem>(index: number, parentContainer: readonly TItem[]) => {
   if (index > parentContainer.length)
     throw new Error('Index was be greater than parent container length');
 }
